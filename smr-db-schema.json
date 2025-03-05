@@ -1,24 +1,67 @@
+// 
 // https://dbdiagram.io/d
+// 
 
+// Enum Device Status (Trạng thái thiết bị)
+Enum "devicestatus" {
+  "WORKING" // Hoạt động
+  "BROKEN" // Hỏng
+  "MAINTENANCE" // Bảo trì
+}
 
+// Enum Meeting Room Maintenance History Status (Trạng thái lịch sử bảo trì phòng họp)
+Enum "meetingroommaintenancehistorystatus" {
+  "PENDING" // Chờ
+  "IN_PROGRESS" // Đang tiến hành
+  "COMPLETED" // Hoàn tất
+  "CANCELLED" // Hủy bỏ
+}
+
+// Enum Meeting Room Status (Trạng thái phòng họp)
+Enum "meetingroomstatus" {
+  "AVAILABLE" // Có sẵn
+  "USED" // Đang sử dụng
+  "MAINTENANCE" // Đang bảo trì
+}
+
+// Enum Meeting Status (Trạng thái cuộc họp)
+Enum "meetingstatus" {
+  "SCHEDULED" // Đã đặt
+  "ENDED" // Đã kết thúc
+  "CANCELLED" // Đã hủy
+}
+
+// Enum Participant Status (Trạng thái người tham gia)  
+Enum "participantstatus" {
+  "INVITED" // Đã mời
+  "CONFIRMED" // Đã xác nhận
+  "DECLINED" // Đã từ chối
+  "ABSENT" // Vắng mặt
+  "ATTENDED" // Đã tham gia
+}
 
 // Bảng Organization (Tổ chức)
-Table organization {
+Table organizations {
   id int [pk, increment] // Khóa chính, Tự động tăng
+
   name varchar(255) // Tên tổ chức
   phone_number varchar(255) // Số điện thoại tổ chức
   email varchar(255) // Email tổ chức
   address varchar(255) // Địa chỉ tổ chức
+  
   created_at timestamp // Thời gian tổ chức được tạo
   updated_at timestamp // Thời gian tổ chức được cập nhật
   meta_data json // Dữ liệu metadata bổ sung cho tổ chức
 }
 
 // Bảng Department (Phòng ban)
-Table department {
+Table departments {
   id int [pk, increment] // Khóa chính, Tự động tăng
+
   name varchar(255) // Tên phòng ban
+
   organization_id int // Khóa ngoại trỏ đến bảng Organization
+
   created_at timestamp // Thời gian phòng ban được tạo
   updated_at timestamp // Thời gian phòng ban được cập nhật
   meta_data json // Dữ liệu metadata bổ sung cho phòng ban
@@ -27,44 +70,81 @@ Table department {
 // Bảng Employee (Nhân viên)
 Table employee {
   id int [pk, increment] // Khóa chính, Tự động tăng
+
   first_name varchar(255) // Tên nhân viên
   last_name varchar(255) // Họ nhân viên
   email varchar(255) // Địa chỉ email của nhân viên
   phone_number varchar(20) // Số điện thoại của nhân viên
-  department_id int // Khóa ngoại trỏ đến bảng Department
   hire_date date // Ngày nhân viên được tuyển dụng
   salary decimal(10, 2) // Mức lương của nhân viên
   occupation varchar(255) // Nghề nghiệp hoặc chức danh của nhân viên
   decentralization boolean // Nhân viên có làm việc từ xa không (True/False)
+
   reports_to int // ID của nhân viên mà nhân viên này báo cáo
+  department_id int // Khóa ngoại trỏ đến bảng Department
+  
   created_at timestamp // Thời gian nhân viên được tạo
   updated_at timestamp // Thời gian nhân viên được cập nhật
   meta_data json // Dữ liệu metadata bổ sung cho nhân viên
-  organization_id int // Khóa ngoại trỏ đến bảng Organization
 }
 
 // Bảng Meeting Room (Phòng họp)
-Table meeting_room {
+Table meeting_rooms {
   id int [pk, increment] // Khóa chính, Tự động tăng
+
   name varchar(255) // Tên phòng họp (Ví dụ: "Phòng họp A")
+  description varchar(255) // Mô tả phòng họp
+  floor int // Vị trí tầng của phòng họp
   location varchar(255) // Vị trí phòng họp (tòa nhà, tầng, v.v.)
   capacity int // Sức chứa tối đa của phòng họp
+  status meetingroomstatus // Trạng thái của phòng họp (Ví dụ: "Sẵn sàng", "Đang bảo trì", "Đã đặt")
+  is_clean boolean // Phòng họp có sạch sẽ hay không (true: sạch, false: chưa sạch)
+  is_under_maintenance boolean // Phòng họp có đang trong quá trình bảo trì hay không (true: đang bảo trì, false: không)
+  map_url varchar(255) // Liên kết hoặc đường dẫn đến bản đồ vị trí phòng họp (Ví dụ: URL Google Maps hoặc bản đồ nội bộ)
+
+  position_x int // Vị trí theo trục x
+  position_y int // Vị trí theo trục y 
+  dimensions_width int // Chiều rộng của phòng
+  dimensions_height int // Chiều cao của phòng
+
   organization_id int // Khóa ngoại trỏ đến bảng Organization
-  status varchar(50) // Trạng thái của phòng họp (Ví dụ: "Sẵn sàng", "Đang bảo trì", "Đã đặt")
+  
   created_at timestamp // Thời gian phòng họp được tạo
   updated_at timestamp // Thời gian phòng họp được cập nhật
   meta_data json // Dữ liệu metadata bổ sung cho phòng họp
 }
 
-// Bảng Meeting (Cuộc họp)
-Table meeting {
+// Bảng Meeting Room Maintenance Histories (Lịch sử bảo trì)
+Table meeting_room_maintenance_histories {
   id int [pk, increment] // Khóa chính, Tự động tăng
+
+  name varchar(255) // Tên lịch sử bảo trì
+  description varchar(255) // Mô tả lịch sử bảo trì
+  type varchar(255) // Loại lịch sử bảo trì
+  status meetingroommaintenancehistorystatus // Trạng thái lịch sử bảo trì
+  staff varchar(255) // Tên Nhân viên bảo trì
+
   meeting_room_id int // Khóa ngoại trỏ đến bảng Meeting Room
-  organizer_id int // ID nhân viên tổ chức cuộc họp
+
+  created_at timestamp // Thời gian cuộc họp được tạo
+  updated_at timestamp // Thời gian cuộc họp được cập nhật
+  meta_data json // Dữ liệu metadata bổ sung cho cuộc họp
+}
+
+
+// Bảng Meeting (Cuộc họp)
+Table meetings {
+  id int [pk, increment] // Khóa chính, Tự động tăng
+
+  subject varchar(255) // Chủ đề hoặc tiêu đề cuộc họp
+  detail varchar(255) // Chủ đề hoặc tiêu đề cuộc họp
+  status meetingstatus // Trạng thái cuộc họp
   start_time timestamp // Thời gian bắt đầu cuộc họp
   end_time timestamp // Thời gian kết thúc cuộc họp
-  subject varchar(255) // Chủ đề hoặc tiêu đề cuộc họp
-  status varchar(50) // Trạng thái cuộc họp (Ví dụ: "Đã lên lịch", "Đã kết thúc", "Đã hủy")
+  
+  meeting_room_id int // Khóa ngoại trỏ đến bảng Meeting Room
+  organizer_id int // ID nhân viên tổ chức cuộc họp
+  
   created_at timestamp // Thời gian cuộc họp được tạo
   updated_at timestamp // Thời gian cuộc họp được cập nhật
   meta_data json // Dữ liệu metadata bổ sung cho cuộc họp
@@ -73,11 +153,14 @@ Table meeting {
 // Bảng Device (Thiết bị)
 Table device {
   id int [pk, increment] // Khóa chính, Tự động tăng
+
   name varchar(255) // Tên thiết bị (Ví dụ: "Máy chiếu", "Điện thoại hội nghị")
   type varchar(255) // Loại thiết bị (Ví dụ: "Âm thanh", "Hình ảnh", "Hiển thị")
-  status varchar(50) // Trạng thái thiết bị (Ví dụ: "Có sẵn", "Đang sử dụng", "Đang bảo trì")
+  status devicestatus // Trạng thái thiết bị
+
   meeting_room_id int // Khóa ngoại trỏ đến bảng Meeting Room
   organization_id int // Khóa ngoại trỏ đến bảng Organization
+  
   created_at timestamp // Thời gian thiết bị được tạo
   updated_at timestamp // Thời gian thiết bị được cập nhật
   meta_data json // Dữ liệu metadata bổ sung cho thiết bị
@@ -85,40 +168,58 @@ Table device {
 
 // Bảng Meeting Devices (Mối quan hệ giữa cuộc họp và thiết bị)
 Table meeting_device {
+  quantity int // Số lượng của thiết bị trong cuộc họp
+
   meeting_id int // Khóa ngoại trỏ đến bảng Meeting
   device_id int // Khóa ngoại trỏ đến bảng Device
+  
   created_at timestamp // Thời gian thiết bị được gán cho cuộc họp
   updated_at timestamp // Thời gian cập nhật gán thiết bị cho cuộc họp
   meta_data json // Dữ liệu metadata bổ sung cho mối quan hệ cuộc họp - thiết bị
 }
 
+
+// Bảng MeetingGuest (Dành cho khách không có tài khoản)
+Table meeting_guest {
+  id int [pk, increment] // Khóa chính, Tự động tăng
+
+  
+  email varchar(255) // Email khách
+  phone_number varchar(255) // Số điện thoại khách
+
+  created_at timestamp // Thời gian tạo
+  updated_at timestamp // Thời gian cập nhật
+  meta_data json // Dữ liệu metadata bổ sung
+}
+
 // Bảng Meeting Participant (Tham gia cuộc họp)
 Table meeting_participant {
+  id int [pk, increment] // Khóa chính, Tự động tăng
+
+  role varchar(255) // Vai trò của người tham gia
+  status participantstatus // Trạng thái người tham gia
+  
   meeting_id int // Khóa ngoại trỏ đến bảng Meeting
   employee_id int // Khóa ngoại trỏ đến bảng Employee
-  email varchar(255) // Địa chỉ email của người tham gia
-  phone_number varchar(20) // Số điện thoại của người tham gia
-  role varchar(255) // Vai trò của người tham gia (Ví dụ: "Người tham dự", "Người tổ chức", "Thư ký", v.v.)
-  status varchar(50) // Trạng thái tham gia (Ví dụ: "Đã xác nhận", "Đã mời", "Vắng mặt")
+  meeting_guest_id int // Khóa ngoại trỏ đến bảng MeetingGuest
+
   created_at timestamp // Thời gian người tham gia được thêm vào cuộc họp
   updated_at timestamp // Thời gian cập nhật thông tin người tham gia
   meta_data json // Dữ liệu metadata bổ sung cho người tham gia
 }
 
 // Các quan hệ khóa ngoại
-Ref: department.organization_id > organization.id
-Ref: employee.department_id > department.id
+Ref: departments.organization_id > organizations.id
+Ref: device.organization_id > organizations.id
+Ref: meeting_rooms.organization_id > organizations.id
+Ref: employee.department_id > departments.id
 Ref: employee.reports_to > employee.id
-Ref: meeting.meeting_room_id > meeting_room.id
-Ref: meeting.organizer_id > employee.id
-Ref: device.meeting_room_id > meeting_room.id
-Ref: device.organization_id > organization.id
-Ref: meeting_device.meeting_id > meeting.id
+Ref: device.meeting_room_id > meeting_rooms.id
+Ref: meetings.meeting_room_id > meeting_rooms.id
+Ref: meetings.organizer_id > employee.id
+Ref: meeting_device.meeting_id > meetings.id
 Ref: meeting_device.device_id > device.id
-Ref: meeting_participant.meeting_id > meeting.id
+Ref: meeting_participant.meeting_id > meetings.id
 Ref: meeting_participant.employee_id > employee.id
-Ref: "meeting_room"."organization_id" < "organization"."id"
-Ref: "employee"."organization_id" < "organization"."id"
-
-
-
+Ref: meeting_guest.id < meeting_participant.meeting_guest_id
+Ref: meeting_rooms.id < meeting_room_maintenance_histories.meeting_room_id
