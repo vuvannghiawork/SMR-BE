@@ -6,6 +6,8 @@
 Table organization {
   id int [pk, increment] // Khóa chính, Tự động tăng
   name varchar(255) // Tên tổ chức
+  phone_number varchar(255) // Số điện thoại tổ chức
+  email varchar(255) // Email tổ chức
   address varchar(255) // Địa chỉ tổ chức
   created_at timestamp // Thời gian tổ chức được tạo
   updated_at timestamp // Thời gian tổ chức được cập nhật
@@ -38,6 +40,7 @@ Table employee {
   created_at timestamp // Thời gian nhân viên được tạo
   updated_at timestamp // Thời gian nhân viên được cập nhật
   meta_data json // Dữ liệu metadata bổ sung cho nhân viên
+  organization_id int // Khóa ngoại trỏ đến bảng Organization
 }
 
 // Bảng Meeting Room (Phòng họp)
@@ -114,3 +117,8 @@ Ref: meeting_device.meeting_id > meeting.id
 Ref: meeting_device.device_id > device.id
 Ref: meeting_participant.meeting_id > meeting.id
 Ref: meeting_participant.employee_id > employee.id
+Ref: "meeting_room"."organization_id" < "organization"."id"
+Ref: "employee"."organization_id" < "organization"."id"
+
+
+
